@@ -9,8 +9,6 @@ eval 'exec perl -S $0 ${1+"$@"}'
 # This software is provided as-is and is not officially supported
 #
 
-$version = "0.1.1";
-
 
 sub usage {
 
@@ -22,21 +20,15 @@ Invoke tkdiff on all files found to differ between dir1 and dir2
 Options:
 	-D opts   Additional diff(1) options
 	-h        Print this message
-	-v        Print version and exit
 USAGE
 
    exit 1;
 }
 
 require "getopts.pl"
-&Getopts("D:hv");
+&Getopts("D:h");
 
 &usage if $opt_h || $#ARGV != 1;
-
-if ($opt_v) {
-    print "Version $version\n";
-    exit(0);
-}
 
 $dir1 = shift(@ARGV);
 $dir2 = shift(@ARGV);
