@@ -1,0 +1,69 @@
+eval 'exec perl -S $0 ${1+"$@"}'
+                 if 0;                                                          
+
+#
+# Invoke tkdiff on all files found to differ in two directories
+#
+# Original author: Janick Bergeron <janick@bergeron.com>, Jun 2014
+#
+# This software is provided as-is and is not officially supported
+#
+
+$version = "0.1.1";
+
+
+sub usage {
+
+    print STDERR <<USAGE;
+Usage: $0 dir1 dir2
+
+Invoke tkdiff on all files found to differ between dir1 and dir2
+
+Options:
+	-D opts   Additional diff(1) options
+	-h        Print this message
+	-v        Print version and exit
+USAGE
+
+   exit 1;
+}
+
+require "getopts.pl"
+&Getopts("D:hv");
+
+&usage if $opt_h || $#ARGV != 1;
+
+if ($opt_v) {
+    print "Version $version\n";
+    exit(0);
+}
+
+$dir1 = shift(@ARGV);
+$dir2 = shift(@ARGV);
+
+if (!-d $dir1) {
+    print STDERR "ERROR: \"$dir1\" is not a directory.\n";
+    exit(1);
+}	
+if (!-d $dir2) {
+    print STDERR "ERROR: \"$dir2\" is not a directory.\n";
+    exit(1);
+}	
+
+#
+# Use diff to identify the files that do differ
+#
+$rc = open(DIFF, "/usr/bin/diff -r --brief $opt_D $dir1 $dir2 |");
+if (!$rc) {
+    print STDERR "Unable to run diff: $!\n";
+    exit($rc);
+}
+while ($_ = <DIFF>) {
+    next unless m/^Files (.*) and (.*) differ/;
+    $fname1 = $1;
+    $fname2 = $2;
+    system("tkdiff $opt_D $fname1 $fname2");
+}
+close(DIFF);
+
+
